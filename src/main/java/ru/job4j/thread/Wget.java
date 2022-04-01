@@ -12,6 +12,7 @@ public class Wget implements Runnable {
     private final String file;
     private final int speed;
     private static final long MS_IN_SEC = 1000;
+    private static final int BUFFER_SIZE = 1024;
 
     public Wget(String url, int speed, String file) {
         this.url = url;
@@ -25,16 +26,22 @@ public class Wget implements Runnable {
              FileOutputStream fileOutputStream = new FileOutputStream(file)) {
             byte[] dataBuffer = new byte[1024];
             int bytesRead;
+            int restDownloadData = speed;
+            int currentBufferSize = BUFFER_SIZE;
             long start = System.currentTimeMillis();
-            while ((bytesRead = in.read(dataBuffer, 0, 1024)) != -1) {
+            while ((bytesRead = in.read(dataBuffer, 0, currentBufferSize)) != -1) {
                 fileOutputStream.write(dataBuffer, 0, bytesRead);
-                long finish = System.currentTimeMillis();
-                long speedTime = (long) Math.ceil((double) MS_IN_SEC * bytesRead / speed);
-                long timeSleep = speedTime - (finish - start);
-                if (timeSleep > 0) {
-                    Thread.sleep(timeSleep);
+                restDownloadData -= bytesRead;
+                if (restDownloadData == 0) {
+                    long finish = System.currentTimeMillis();
+                    long timeSleep = MS_IN_SEC - (finish - start);
+                    if (timeSleep > 0) {
+                        Thread.sleep(timeSleep);
+                    }
+                    restDownloadData = speed;
+                    start = System.currentTimeMillis();
                 }
-                start = System.currentTimeMillis();
+                currentBufferSize = Math.min(BUFFER_SIZE, restDownloadData);
             }
         } catch (MalformedURLException e) {
             e.printStackTrace();
