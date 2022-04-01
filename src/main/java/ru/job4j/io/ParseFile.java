@@ -14,7 +14,7 @@ public final class ParseFile {
         StringBuilder output = new StringBuilder();
         try (BufferedInputStream i = new BufferedInputStream(new FileInputStream(file))) {
             int data;
-            while ((data = i.read()) > 0) {
+            while ((data = i.read()) != -1) {
                 if (filter.test((char)data)) {
                     output.append((char) data);
                 }
@@ -30,6 +30,4 @@ public final class ParseFile {
     public String getContentWithoutUnicode() throws IOException {
         return content(ch -> ch < 0x80);
     }
-
-
 }
