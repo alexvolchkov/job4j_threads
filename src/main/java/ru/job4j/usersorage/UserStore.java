@@ -3,28 +3,39 @@ package ru.job4j.usersorage;
 import net.jcip.annotations.GuardedBy;
 import net.jcip.annotations.ThreadSafe;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Predicate;
 
 @ThreadSafe
 public class UserStore {
     @GuardedBy("this")
-    private final Set<User> users = new HashSet<>();
+    private final Map<Integer, User> users = new HashMap<>();
 
     public synchronized boolean add(User user) {
-        return users.add(user);
+        return putIf(user, u -> !users.containsKey(u.getId()));
     }
 
     public synchronized boolean update(User user) {
+        return putIf(user, u -> users.containsKey(u.getId()));
+    }
+
+    private synchronized boolean putIf(User user, Predicate<User> filter) {
         boolean rsl = false;
-        if (delete(user)) {
-            rsl = add(user);
+        if (filter.test(user)) {
+            users.put(user.getId(), user);
+            rsl = true;
         }
         return rsl;
     }
 
     public synchronized boolean delete(User user) {
-        return users.remove(user);
+        boolean rsl = false;
+        if (users.containsKey(user.getId())) {
+            users.remove(user.getId());
+            rsl = true;
+        }
+        return rsl;
     }
 
     public synchronized void transfer(int fromId, int toId, int amount) {
@@ -39,13 +50,7 @@ public class UserStore {
     }
 
     public synchronized User findById(int id) {
-        User rsl = null;
-        for (User user : users) {
-            if (user.getId() == id) {
-                rsl = new User(user.getId(), user.getAmount());
-                break;
-            }
-        }
-        return rsl;
+        User currenUser = users.get(id);
+        return (currenUser == null) ? null : new User(currenUser.getId(), currenUser.getAmount());
     }
 }
