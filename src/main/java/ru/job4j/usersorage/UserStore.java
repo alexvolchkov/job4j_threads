@@ -5,7 +5,6 @@ import net.jcip.annotations.ThreadSafe;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Predicate;
 
 @ThreadSafe
 public class UserStore {
@@ -13,44 +12,23 @@ public class UserStore {
     private final Map<Integer, User> users = new HashMap<>();
 
     public synchronized boolean add(User user) {
-        return putIf(user, u -> !users.containsKey(u.getId()));
+        return users.putIfAbsent(user.getId(), user) == null;
     }
 
     public synchronized boolean update(User user) {
-        return putIf(user, u -> users.containsKey(u.getId()));
-    }
-
-    private synchronized boolean putIf(User user, Predicate<User> filter) {
-        boolean rsl = false;
-        if (filter.test(user)) {
-            users.put(user.getId(), user);
-            rsl = true;
-        }
-        return rsl;
+       return users.replace(user.getId(), user) == null;
     }
 
     public synchronized boolean delete(User user) {
-        boolean rsl = false;
-        if (users.containsKey(user.getId())) {
-            users.remove(user.getId());
-            rsl = true;
-        }
-        return rsl;
+       return users.remove(user.getId()) != null;
     }
 
     public synchronized void transfer(int fromId, int toId, int amount) {
-        User fromUser = findById(fromId);
-        User toUser = findById(toId);
-        if (fromUser != null && toUser != null) {
+        User fromUser = users.get(fromId);
+        User toUser = users.get(toId);
+        if (fromUser != null && toUser != null && fromUser.getAmount() >= amount) {
             fromUser.setAmount(fromUser.getAmount() - amount);
             toUser.setAmount(toUser.getAmount() + amount);
-            update(fromUser);
-            update(toUser);
         }
-    }
-
-    public synchronized User findById(int id) {
-        User currenUser = users.get(id);
-        return (currenUser == null) ? null : new User(currenUser.getId(), currenUser.getAmount());
     }
 }
