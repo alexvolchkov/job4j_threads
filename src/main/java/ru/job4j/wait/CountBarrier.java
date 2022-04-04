@@ -22,7 +22,7 @@ public class CountBarrier {
                 try {
                     wait();
                 } catch (InterruptedException e) {
-                    e.printStackTrace();
+                   return;
                 }
             }
         }
