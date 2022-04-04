@@ -14,7 +14,11 @@ public class SimpleBlockingQueueTest {
                 () -> {
                     int index = 1;
                     while (true) {
-                        queue.offer(index++);
+                        try {
+                            queue.offer(index++);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
                     }
                 }
         );
@@ -30,7 +34,11 @@ public class SimpleBlockingQueueTest {
         SimpleBlockingQueue<Integer> queue = new SimpleBlockingQueue<>(10);
         Thread producer = new Thread(
                 () -> {
+                    try {
                         queue.offer(1);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
                 }
         );
         producer.start();
@@ -38,7 +46,11 @@ public class SimpleBlockingQueueTest {
         Thread consumer = new Thread(
                 () -> {
                     while (true) {
-                        queue.poll();
+                        try {
+                            queue.poll();
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
                     }
                 }
         );
