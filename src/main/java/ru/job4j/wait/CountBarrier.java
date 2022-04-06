@@ -22,7 +22,7 @@ public class CountBarrier {
                 try {
                     wait();
                 } catch (InterruptedException e) {
-                   return;
+                    Thread.currentThread().interrupt();
                 }
             }
         }
