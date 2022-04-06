@@ -12,14 +12,10 @@ public class CASCount {
         int temp;
         do {
             temp = get();
-        } while (!count.compareAndSet(temp, ++temp));
+        } while (!count.compareAndSet(temp, temp + 1));
     }
 
     public int get() {
-        try {
             return count.get();
-        } catch (NullPointerException e) {
-            throw new UnsupportedOperationException("Count is not impl.");
-        }
     }
 }
