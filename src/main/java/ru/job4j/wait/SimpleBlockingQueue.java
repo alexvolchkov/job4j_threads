@@ -13,8 +13,12 @@ public class SimpleBlockingQueue<T> {
 
     private final int size;
 
-    public Queue<T> getQueue() {
+    public synchronized Queue<T> getQueue() {
         return new LinkedList<>(queue);
+    }
+
+    public synchronized boolean isEmpty() {
+        return queue.isEmpty();
     }
 
     public SimpleBlockingQueue(int size) {
