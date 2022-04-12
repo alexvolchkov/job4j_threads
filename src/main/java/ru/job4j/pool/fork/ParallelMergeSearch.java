@@ -19,7 +19,7 @@ public class ParallelMergeSearch<T> extends RecursiveTask<Integer> {
 
     @Override
     protected Integer compute() {
-        if (to - from <= LINE_SEARCH) {
+        if (to - from < LINE_SEARCH) {
             return lineSearch(array, value);
         }
         int mid = (from + to) / 2;
@@ -29,15 +29,7 @@ public class ParallelMergeSearch<T> extends RecursiveTask<Integer> {
         rightSearch.fork();
         int left = leftSearch.join();
         int right = rightSearch.join();
-        int rsl;
-        if (left == right
-                || (left < right && left != NOT_FOUND)
-                || (left > right && right == NOT_FOUND)) {
-            rsl = left;
-        } else {
-            rsl = right;
-        }
-        return rsl;
+        return Math.max(left, right);
     }
 
     private int lineSearch(T[] array, T value) {
