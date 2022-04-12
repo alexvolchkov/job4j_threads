@@ -17,3 +17,5 @@
 5. Non Blocking Algoritm.
 
 6. Пулы.
+
+Создание ветки в IDEA
